@@ -41,4 +41,5 @@ pipeline:
                     repo: vikramtek/harness-cache-demo
                     tags:
                       - Demo
+                    dockerfile: Dockerfile
                     caching: true
