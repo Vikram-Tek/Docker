@@ -1,0 +1,44 @@
+pipeline:
+  name: DCL
+  identifier: DCL
+  projectIdentifier: VN
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: VikramTek
+        build: <+input>
+  stages:
+    - stage:
+        name: Build
+        identifier: Build
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+          buildIntelligence:
+            enabled: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec:
+              imageSpec:
+                imageName: ubuntu-latest
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: BuildAndPushDockerRegistry
+                  identifier: BuildAndPushDockerRegistry
+                  spec:
+                    connectorRef: Vikram_Docker
+                    repo: vikramtek/harness-cache-demo
+                    tags:
+                      - Demo
+                    caching: true
