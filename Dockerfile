@@ -13,7 +13,7 @@ RUN apk add --no-cache \
     openssl
 
 # Set build environment variables
-ENV MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" \
+ENV MAVEN_OPTS="-Xmx1024m" \
     JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom" \
     BUILD_DATE="2024-01-01T00:00:00Z" \
     VCS_REF="unknown"
