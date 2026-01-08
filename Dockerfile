@@ -32,10 +32,6 @@ RUN chmod +x ./mvnw
 # Download dependencies (this layer will be cached if pom.xml doesn't change)
 RUN ./mvnw dependency:go-offline -B
 
-# Copy additional configuration files
-COPY *.properties . 2>/dev/null || true
-COPY *.yml . 2>/dev/null || true
-
 # Copy source code
 COPY src src
 
