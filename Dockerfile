@@ -22,7 +22,7 @@ ENV MAVEN_OPTS="-Xmx1024m" \
 WORKDIR /app
 
 # Create build user for security during build
-RUN ddgroup -g 1000 -S builduser && \
+RUN addgroup -g 1000 -S builduser && \
     adduser -u 1000 -S builduser -G builduser && \
     mkdir -p /home/builduser/.m2 && \
     chown -R builduser:builduser /home/builduser/.m2
