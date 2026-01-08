@@ -1,24 +1,6 @@
-# Multi-stage build for Spring Pet Clinic Application with Enhanced Features
+# Multi-stage build for Spring Pet Clinic Application
 FROM eclipse-temurin:17-jdk-alpine AS build
 
-<<<<<<< HEAD
-# Install build dependencies and tools
-RUN apk add --no-cache \
-    curl \
-    git \
-    bash \
-    findutils \
-    tar \
-    gzip \
-    ca-certificates \
-    openssl
-
-# Set build environment variables
-ENV MAVEN_OPTS="-Xmx1024m" \
-    JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom" \
-    BUILD_DATE="2024-01-01T00:00:00Z" \
-    VCS_REF="unknown"
-=======
 # Install build dependencies
 RUN apk add --no-cache \
     curl \
@@ -32,55 +14,31 @@ RUN apk add --no-cache \
 # Set build environment variables
 ENV MAVEN_OPTS="-Xmx1024m" \
     JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
->>>>>>> 3c190f4 (Docker layer caching demo setup)
 
 # Set working directory
 WORKDIR /app
 
-# Create build user for security during build
-RUN addgroup -g 1000 -S builduser && \
-    adduser -u 1000 -S builduser -G builduser && \
-    mkdir -p /home/builduser/.m2 && \
-    chown -R builduser:builduser /home/builduser/.m2
-
 # Copy Maven wrapper and pom.xml first for better layer caching
-COPY --chown=builduser:builduser mvnw .
-COPY --chown=builduser:builduser .mvn .mvn
-COPY --chown=builduser:builduser pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
 
 # Make Maven wrapper executable
 RUN chmod +x ./mvnw
-
-# Switch to build user
-USER builduser
 
 # Download dependencies (this layer will be cached if pom.xml doesn't change)
 RUN ./mvnw dependency:go-offline -B
 
 # Copy source code
-<<<<<<< HEAD
-COPY --chown=builduser:builduser src src
-=======
 COPY src ./src
->>>>>>> 3c190f4 (Docker layer caching demo setup)
 
-# Run static analysis and security checks
-RUN ./mvnw compile checkstyle:check -B || true
+# Build the application
+RUN ./mvnw clean package -DskipTests -B
 
-# Build the application with profiles
-RUN ./mvnw clean package -DskipTests -B -Pproduction
-
-# Extract JAR layers for better caching
-RUN java -Djarmode=layertools -jar target/*.jar extract
-
-# Runtime stage with enhanced security and monitoring
+# Runtime stage
 FROM eclipse-temurin:17-jre-alpine AS runtime
 
-<<<<<<< HEAD
-# Install runtime dependencies and monitoring tools
-=======
 # Install runtime dependencies and utilities
->>>>>>> 3c190f4 (Docker layer caching demo setup)
 RUN apk add --no-cache \
     curl \
     wget \
@@ -91,13 +49,9 @@ RUN apk add --no-cache \
     jq \
     netcat-openbsd \
     procps \
-<<<<<<< HEAD
-    htop && \
-=======
     htop \
     vim \
     nano && \
->>>>>>> 3c190f4 (Docker layer caching demo setup)
     rm -rf /var/cache/apk/*
 
 # Set timezone
@@ -105,80 +59,23 @@ ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Create application directories
-<<<<<<< HEAD
-RUN mkdir -p /app/logs /app/config /app/tmp /app/monitoring
-
-# Create non-root user for security with specific UID/GID
-=======
 RUN mkdir -p /app/logs /app/config /app/data /app/scripts /app/backup
 
 # Create non-root user for security
->>>>>>> 3c190f4 (Docker layer caching demo setup)
 RUN addgroup -g 1001 -S spring && \
     adduser -u 1001 -S spring -G spring -h /app -s /bin/bash
 
 # Set working directory
 WORKDIR /app
 
-<<<<<<< HEAD
-# Copy JAR layers for better caching
-COPY --from=build --chown=spring:spring /app/dependencies/ ./
-COPY --from=build --chown=spring:spring /app/spring-boot-loader/ ./
-COPY --from=build --chown=spring:spring /app/snapshot-dependencies/ ./
-COPY --from=build --chown=spring:spring /app/application/ ./
-
-# Copy application JAR as fallback
-COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
-
-# Create application configuration
-=======
 # Copy the built JAR from build stage
 COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
 
 # Create application configuration files
->>>>>>> 3c190f4 (Docker layer caching demo setup)
 RUN echo 'server.port=8080' > /app/config/application.properties && \
     echo 'management.endpoints.web.exposure.include=health,info,metrics,prometheus' >> /app/config/application.properties && \
     echo 'management.endpoint.health.show-details=always' >> /app/config/application.properties && \
     echo 'logging.file.name=/app/logs/application.log' >> /app/config/application.properties && \
-<<<<<<< HEAD
-    echo 'logging.level.org.springframework.samples.petclinic=DEBUG' >> /app/config/application.properties
-
-# Set up log rotation configuration
-RUN echo '/app/logs/*.log {' > /etc/logrotate.d/petclinic && \
-    echo '    daily' >> /etc/logrotate.d/petclinic && \
-    echo '    rotate 7' >> /etc/logrotate.d/petclinic && \
-    echo '    compress' >> /etc/logrotate.d/petclinic && \
-    echo '    delaycompress' >> /etc/logrotate.d/petclinic && \
-    echo '    missingok' >> /etc/logrotate.d/petclinic && \
-    echo '    notifempty' >> /etc/logrotate.d/petclinic && \
-    echo '}' >> /etc/logrotate.d/petclinic
-
-# Create startup script with enhanced features
-RUN echo '#!/bin/bash' > /app/startup.sh && \
-    echo 'set -e' >> /app/startup.sh && \
-    echo 'echo "Starting PetClinic Application..."' >> /app/startup.sh && \
-    echo 'echo "Java Version: $(java -version 2>&1 | head -n 1)"' >> /app/startup.sh && \
-    echo 'echo "Available Memory: $(free -h | grep Mem | awk "{print \$2}")"' >> /app/startup.sh && \
-    echo 'echo "Available Disk: $(df -h / | tail -1 | awk "{print \$4}")"' >> /app/startup.sh && \
-    echo 'mkdir -p /app/logs' >> /app/startup.sh && \
-    echo 'touch /app/logs/application.log' >> /app/startup.sh && \
-    echo 'exec java $JAVA_OPTS -jar app.jar "$@"' >> /app/startup.sh && \
-    chmod +x /app/startup.sh
-
-# Create monitoring script
-RUN echo '#!/bin/bash' > /app/monitor.sh && \
-    echo 'while true; do' >> /app/monitor.sh && \
-    echo '  echo "$(date): Memory: $(free -m | grep Mem | awk "{print \$3/\$2*100}")% CPU: $(top -bn1 | grep "Cpu(s)" | awk "{print \$2}" | cut -d"%" -f1)%" >> /app/logs/monitoring.log' >> /app/monitor.sh && \
-    echo '  sleep 60' >> /app/monitor.sh && \
-    echo 'done' >> /app/monitor.sh && \
-    chmod +x /app/monitor.sh
-
-# Set proper permissions
-RUN chown -R spring:spring /app && \
-    chmod -R 755 /app && \
-    chmod 644 /app/*.jar
-=======
     echo 'logging.level.org.springframework.samples.petclinic=INFO' >> /app/config/application.properties && \
     echo 'spring.jpa.show-sql=false' >> /app/config/application.properties && \
     echo 'spring.datasource.hikari.maximum-pool-size=10' >> /app/config/application.properties
@@ -223,6 +120,60 @@ RUN echo '#!/bin/bash' > /app/scripts/healthcheck.sh && \
 # Create backup script
 RUN echo '#!/bin/bash' > /app/scripts/backup.sh && \
     echo 'BACKUP_DIR="/app/backup"' >> /app/scripts/backup.sh && \
+    echo 'TIMESTAMP=$(date +"%Y%m%d_%H%M%S")' >> /app/scripts/backup.sh && \
+    echo 'mkdir -p $BACKUP_DIR' >> /app/scripts/backup.sh && \
+    echo 'tar -czf $BACKUP_DIR/logs_backup_$TIMESTAMP.tar.gz /app/logs/' >> /app/scripts/backup.sh && \
+    echo 'echo "Backup completed: $TIMESTAMP"' >> /app/scripts/backup.sh && \
+    chmod +x /app/scripts/backup.sh
+
+# Set proper permissions
+RUN chown -R spring:spring /app && \
+    chmod -R 755 /app/scripts && \
+    chmod 644 /app/app.jar
+
+# Switch to non-root user
+USER spring
+
+# Set runtime environment variables
+ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -Dspring.config.additional-location=/app/config/" \
+    SPRING_PROFILES_ACTIVE="default" \
+    SERVER_PORT=8080 \
+    MANAGEMENT_PORT=8081 \
+    LOG_LEVEL="INFO" \
+    APP_NAME="petclinic" \
+    APP_VERSION="4.0.0-SNAPSHOT" \
+    SPRING_OUTPUT_ANSI_ENABLED="ALWAYS" \
+    LOGGING_FILE_NAME="/app/logs/application.log"
+
+# Expose ports
+EXPOSE 8080 8081
+
+# Add metadata labels
+LABEL maintainer="Spring PetClinic Team" \
+      version="4.0.0-SNAPSHOT" \
+      description="Spring PetClinic Sample Application" \
+      org.opencontainers.image.title="Spring PetClinic" \
+      org.opencontainers.image.description="A sample Spring Boot application" \
+      org.opencontainers.image.version="4.0.0-SNAPSHOT" \
+      org.opencontainers.image.vendor="Spring" \
+      org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.url="https://github.com/spring-projects/spring-petclinic" \
+      application.framework="Spring Boot" \
+      application.language="Java" \
+      deployment.environment="production"
+
+# Create volumes for persistent data
+VOLUME ["/app/logs", "/app/data", "/app/backup"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD /app/scripts/healthcheck.sh
+
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Run the application
+CMD ["/app/scripts/startup.sh"] >> /app/scripts/backup.sh && \
     echo 'TIMESTAMP=$(date +"%Y%m%d_%H%M%S")' >> /app/scripts/backup.sh && \
     echo 'mkdir -p $BACKUP_DIR' >> /app/scripts/backup.sh && \
     echo 'tar -czf $BACKUP_DIR/logs_backup_$TIMESTAMP.tar.gz /app/logs/' >> /app/scripts/backup.sh && \
