@@ -15,7 +15,7 @@ RUN apk add --no-cache \
 # Set build environment variables
 ENV MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" \
     JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom" \
-    BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+    BUILD_DATE="2024-01-01T00:00:00Z" \
     VCS_REF="unknown"
 
 # Set working directory
