@@ -40,6 +40,6 @@ pipeline:
                     connectorRef: Vikram_Docker
                     repo: vikramtek/harness-cache-demo
                     tags:
-                      - Demo
+                      - Demo2
                     dockerfile: Dockerfile
                     caching: true
