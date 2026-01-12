@@ -1,0 +1,62 @@
+pipeline:
+  name: tutorial-test-container-image-scan-v1
+  identifier: tutorialtestcontainerimagescanv1
+  projectIdentifier: VN
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: scan_image
+        identifier: scan_image
+        description: ""
+        type: SecurityTests
+        spec:
+          cloneCodebase: false
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Background
+                  name: background_dind
+                  identifier: background_dind
+                  spec:
+                    connectorRef: Vikram_Docker
+                    image: docker:dind
+                    shell: Sh
+                    entrypoint:
+                      - dockerd
+              - step:
+                  type: AquaTrivy
+                  name: scan_image
+                  identifier: scan_image
+                  spec:
+                    mode: orchestration
+                    config: default
+                    target:
+                      name: <+input>
+                      type: container
+                      variant: <+input>
+                    advanced:
+                      log:
+                        level: info
+                      fail_on_severity: critical
+                    privileged: true
+                    image:
+                      type: docker_v2
+                      name: <+input>
+                      domain: docker.io
+                      tag: <+input>
+                    sbom:
+                      format: spdx-json
+          caching:
+            enabled: false
+            paths: []
+          slsa_provenance:
+            enabled: false
+          sharedPaths:
+            - /var/run
