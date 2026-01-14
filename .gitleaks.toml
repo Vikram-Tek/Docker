@@ -2,9 +2,9 @@ title = "org gitleaks rules"
 
 [allowlist]
 description = "global allowlist for known false positives"
-paths = ["README.md"]
+#paths = ["README.md"]
 # use regexes for exact known false positives (rotated tokens), be careful storing secrets here
-regexes = ['"EXAMPLE-TEST-KEY-12345"']
+# regexes = ['"EXAMPLE-TEST-KEY-12345"']
 
 [[rules]]
 id = "custom-api-key"
