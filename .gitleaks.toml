@@ -1,0 +1,13 @@
+title = "org gitleaks rules"
+
+[allowlist]
+description = "global allowlist for known false positives"
+paths = ["README.md"]
+# use regexes for exact known false positives (rotated tokens), be careful storing secrets here
+regexes = ['"EXAMPLE-TEST-KEY-12345"']
+
+[[rules]]
+id = "custom-api-key"
+description = "Org API key pattern"
+regex = '''(?i)org_api_key_[A-Za-z0-9]{32}'''
+tags = ["apikey","org"]
