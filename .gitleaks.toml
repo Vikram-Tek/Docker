@@ -1,13 +1,24 @@
-title = "org gitleaks rules"
+title = "org gitleaks config"
+extend = { useDefault = true }
 
-[allowlist]
-description = "global allowlist for known false positives"
-paths = ["README.md"]
-# use regexes for exact known false positives (rotated tokens), be careful storing secrets here
-regexes = ['"EXAMPLE-TEST-KEY-12345"']
-
+# custom rule example
 [[rules]]
-id = "custom-api-key"
-description = "Org API key pattern"
-regex = '''(?i)org_api_key_[A-Za-z0-9]{32}'''
-tags = ["apikey","org"]
+id = "custom-api-token"
+description = "Org API token (example)"
+regex = '''token_[0-9a-zA-Z_\-]{32,}'''
+tags = ["api","token","org"]
+
+# allowlist: ignore a rotated/known false positive pattern
+[allowlist]
+description = "allowlist rotated tokens / false positives"
+regexTarget = "match"
+regexes = [
+  '''^ROTATED_TOKEN_EXAMPLE_[0-9A-F]{8}$'''
+]
+
+# ignore certain filepaths entirely
+[[rules]]
+id = "ignore-tests"
+description = "ignore test fixtures"
+[ [rules].allowlists ]
+paths = ['^tests/fixtures/']
