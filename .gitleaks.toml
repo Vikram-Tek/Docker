@@ -1,24 +1,73 @@
-title = "org gitleaks config"
+title = "Org Gitleaks Configuration"
 extend = { useDefault = true }
 
-# custom rule example
-[[rules]]
-id = "custom-api-token"
-description = "Org API token (example)"
-regex = '''token_[0-9a-zA-Z_\-]{32,}'''
-tags = ["api","token","org"]
+########################################
 
-# allowlist: ignore a rotated/known false positive pattern
+# CRITICAL – Cloud Secrets
+
+########################################
+
+[[rules]]
+id = "aws-access-key-id"
+description = "AWS Access Key ID"
+regex = '''AKIA[0-9A-Z]{16}'''
+entropy = 3.5
+severity = "CRITICAL"
+tags = ["aws","cloud","credential"]
+
+[[rules]]
+id = "aws-secret-access-key"
+description = "AWS Secret Access Key"
+regex = '''(?i)aws(.{0,20})?(secret|access)?.{0,20}["'][0-9a-zA-Z/+]{40}["']'''
+entropy = 4.5
+severity = "CRITICAL"
+tags = ["aws","cloud","credential"]
+
+########################################
+
+# HIGH – SCM / CI Tokens
+
+########################################
+
+[[rules]]
+id = "github-pat"
+description = "GitHub Personal Access Token"
+regex = '''ghp_[0-9A-Za-z]{36}'''
+entropy = 3.0
+severity = "HIGH"
+tags = ["github","token"]
+
+########################################
+
+# MEDIUM – Generic Tokens
+
+########################################
+
+[[rules]]
+id = "generic-api-token"
+description = "Generic API token"
+regex = '''(?i)(api|auth|access).{0,20}(key|token|secret).{0,5}["'][A-Za-z0-9_-]{32,}["']'''
+entropy = 3.0
+severity = "MEDIUM"
+tags = ["generic","api"]
+
+########################################
+
+# Allowlist (Global – VALID TOML)
+
+########################################
+
 [allowlist]
-description = "allowlist rotated tokens / false positives"
+description = "Known false positives and test values"
 regexTarget = "match"
+
 regexes = [
-  '''^ROTATED_TOKEN_EXAMPLE_[0-9A-F]{8}$'''
+'''token_TEST_[A-Z0-9]{20,}''',
+'''EXAMPLE_ONLY_[A-Z0-9]{16}'''
 ]
 
-# ignore certain filepaths entirely
-[[rules]]
-id = "ignore-tests"
-description = "ignore test fixtures"
-[ [rules].allowlists ]
-paths = ['^tests/fixtures/']
+paths = [
+'''^docs/''',
+'''^examples/''',
+'''^tests/fixtures/'''
+]
