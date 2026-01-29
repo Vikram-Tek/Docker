@@ -1,37 +1,60 @@
-# Contributing
+## 🔐 Secret Detection & Secure Coding Guidelines
 
-## Pre-commit hooks (Gitleaks)
+To prevent accidental commits of credentials, API keys, or other sensitive data, this repository uses **Gitleaks** for secret detection.
 
-This repository uses `pre-commit` with `gitleaks` to prevent secrets from being committed.
+### Local Developer Setup (Required)
 
-### Install pre-commit
+All contributors **must enable pre-commit hooks** before pushing code.
 
-**macOS**
+#### 1. Install prerequisites
+
 ```bash
-brew install pre-commit
-Linux / Windows
-
+brew install gitleaks
 pip install pre-commit
+```
 
-Enable the hook (required)
+#### 2. Install git hooks
 
-Run once per workstation:
+From the repository root:
 
+```bash
 pre-commit install
+```
 
-Test locally
-pre-commit run --all-files
+This enables automatic secret scanning on every commit.
 
-If a secret is detected
+#### 3. Manual scan (optional)
 
-Do not commit or push
+You can manually scan staged changes:
 
-Follow the secret rotation process in SECRET_ROTATION.md
+```bash
+gitleaks detect --staged --config-path=.gitleaks.toml
+```
 
-Notify the security team
+### Configuration
 
-Bypass hooks (emergency only)
-git commit --no-verify -m "message"
+* Gitleaks rules and allowlists are defined in `.gitleaks.toml`
+* Organization-specific secret patterns **must** be added there
+* Known false positives may be allowlisted **only after approval**
 
+### CI Enforcement
 
-Bypassing requires security approval.
+Even if local hooks are skipped, **Harness STO runs Gitleaks on the full repository history** during CI.
+Commits containing **CRITICAL secrets will fail the pipeline**.
+
+### ❗ Never Commit Real Secrets
+
+* Use placeholder values such as:
+
+  ```
+  token_TEST_000000000000000000000
+  ```
+* All real credentials must be stored in a secrets manager (AWS Secrets Manager, Vault, etc.)
+
+---
+
+If you believe a finding is a false positive:
+
+1. Rotate the secret (if applicable)
+2. Add it to the allowlist in `.gitleaks.toml`
+3. Open a PR explaining the exemption
