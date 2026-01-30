@@ -1,8 +1,4 @@
-# AWS test (will trigger CRITICAL)
-AWS_SECRET_ACCESS_KEY="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+AWS_ACCESS_KEY_ID="AKIAIOSFODNN7EXAMPLE"
 
-# Docker test
-DOCKER_PASSWORD="docker_test_password_1234567890"
+AWS_SECRET_ACCESS_KEY="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 
-# Generic API test
-API_TOKEN="token_TEST_ABCDEFGHIJKLMNOPQRSTUVWXYZ"
