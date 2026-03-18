@@ -25,7 +25,7 @@ RUN ./mvnw clean package -DskipTests -B
 # -------------------------------
 # Runtime stage
 # -------------------------------
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:17-jre-jammy AS runtime
 
 # Create non-root user
 RUN groupadd -g 1001 spring && \
