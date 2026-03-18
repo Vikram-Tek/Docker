@@ -1,7 +1,7 @@
 # -------------------------------
 # Build stage
 # -------------------------------
-FROM eclipse-temurin:17-jdk-jammy AS build
+FROM eclipse-temurin:17-jdk AS build
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ RUN ./mvnw clean package -DskipTests -B
 # -------------------------------
 # Runtime stage
 # -------------------------------
-FROM eclipse-temurin:17-jre-jammy AS runtime
+FROM eclipse-temurin:17-jre AS runtime
 
 # Create non-root user
 RUN groupadd -g 1001 spring && \
