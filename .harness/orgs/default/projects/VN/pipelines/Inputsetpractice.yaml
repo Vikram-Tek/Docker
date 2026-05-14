@@ -39,4 +39,20 @@ pipeline:
                   spec:
                     shell: Python
                     command: print("Hello, World!")
+  variables:
+    - name: image_tag
+      type: String
+      description: ""
+      required: false
+      value: <+input>
+    - name: memory_limit
+      type: String
+      description: ""
+      required: false
+      value: <+input>.default(256Mi)
+    - name: cpu_limit
+      type: String
+      description: ""
+      required: false
+      value: <+input>.default(250m)
 
